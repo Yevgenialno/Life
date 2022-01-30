@@ -42,3 +42,14 @@ F:\Tunkin\Source\Життя\Життя\obj\Debug\Життя.csproj.GenerateResou
 F:\Tunkin\Source\Життя\Життя\obj\Debug\Життя.csproj.CoreCompileInputs.cache
 F:\Tunkin\Source\Життя\Життя\obj\Debug\Життя.exe
 F:\Tunkin\Source\Життя\Життя\obj\Debug\Життя.pdb
+D:\RealProjects\Life\Source\Життя\Життя\bin\Debug\Життя.exe.config
+D:\RealProjects\Life\Source\Життя\Життя\bin\Debug\Життя.exe
+D:\RealProjects\Life\Source\Життя\Життя\bin\Debug\Життя.pdb
+D:\RealProjects\Life\Source\Життя\Життя\obj\Debug\Життя.csproj.AssemblyReference.cache
+D:\RealProjects\Life\Source\Життя\Життя\obj\Debug\Життя.Form1.resources
+D:\RealProjects\Life\Source\Життя\Життя\obj\Debug\Життя.Form2.resources
+D:\RealProjects\Life\Source\Життя\Життя\obj\Debug\Життя.Properties.Resources.resources
+D:\RealProjects\Life\Source\Життя\Життя\obj\Debug\Життя.csproj.GenerateResource.cache
+D:\RealProjects\Life\Source\Життя\Життя\obj\Debug\Життя.csproj.CoreCompileInputs.cache
+D:\RealProjects\Life\Source\Життя\Життя\obj\Debug\Життя.exe
+D:\RealProjects\Life\Source\Життя\Життя\obj\Debug\Життя.pdb

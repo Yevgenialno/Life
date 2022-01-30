@@ -23,24 +23,32 @@ namespace Життя
 
         private void Frm1_Load(object sender, EventArgs e)
         {
-
+            pctr1.BringToFront();
         }
-        int[,] a = new int[100, 100];
-        int[,] b = new int[100, 100];
-        int[,] w = new int[100, 100];
-        List<int> l = new List<int>();
+
+        const int fieldSize = 100;
+        const int cellSize = 6;
+        const int lineWidth = 1;
+        const int elementSize = cellSize + lineWidth;
+
+        int[,] cells = new int[fieldSize, fieldSize];
+        int[,] cellsFuture = new int[fieldSize, fieldSize];
+        int[,] neighbors = new int[fieldSize, fieldSize];
+
         Random r = new Random();
         Graphics g;
-        int s;
-        int ss;
-        int sk;
-        int d = 0;
-        int xod = 0;
-        double k = 0;
-        int zvet = 1;
-        int col = 1;
-        int so;
-        double ro2;
+
+        int neighborCount;
+        int blueNeighborCount;
+        int redNeighborCount;
+        int cycleNumber = 0;
+        double cellCount = 0;
+        int enteringColour = 1;
+        int colourCount = 1;
+        int enteredColour;
+        int prevX = -1;
+        int prevY = -1;
+        double density;
         string filename;
         private void btn1_Click(object sender, EventArgs e)
         {
@@ -52,478 +60,229 @@ namespace Життя
 
         private void pctr1_Click(object sender, EventArgs e)
         {
-            if (rdBtn1.Checked == true)
-                zvet = 1;
-            if (rdBtn2.Checked == true)
-                zvet = 2;
-            if (d == 1)
-            {
-                Point p = this.Location;
-                int x = MousePosition.X - p.X - pctr1.Location.X - 3;
-                int y = MousePosition.Y - p.Y - pctr1.Location.Y - 3;
-                x = x / 7 - 1;
-                y = y / 7 - 4;
-                if ((x >= 0) & (x <= 99) & (y >= 0) & (y <= 99))
-                {
-                    if (a[x, y] == 0)
-                    {
-                        if (col != 9)
-                        {
-                            if (zvet == 1)
-                                g.FillRectangle(Brushes.Blue, x * 7 + 1, y * 7 + 1, 6, 6);
-                            if (zvet == 2)
-                                g.FillRectangle(Brushes.Red, x * 7 + 1, y * 7 + 1, 6, 6);
-                            a[x, y] = zvet;
-                            b[x, y] = zvet;
-                        }
-                        else
-                        {
-                            so = int.Parse(txtBx1.Text);
-                            SolidBrush br = new SolidBrush(Color.FromArgb(255 - 31 * so, 255 - 31 * so, 31 * so));
-                            so++;
-                            if (so == 3)
-                                br.Color = Color.Red;
-                            if (so == 4)
-                                br.Color = Color.DarkOrange;
-                            if (so == 1)
-                                br.Color = Color.Black;
-                            if (so == 2)
-                                br.Color = Color.MidnightBlue;
-                            g.FillRectangle(br, x * 7 + 1, y * 7 + 1, 6, 6);
-                            a[x, y] = so;
-                            b[x, y] = so;
-                        }
-                        k++;
-                    }
-                    else
-                    {
-                        g.FillRectangle(Brushes.White, x * 7 + 1, y * 7 + 1, 6, 6);
-                        a[x, y] = 0;
-                        b[x, y] = 0;
-                        k--;
-                    }
-                }
-            }
-            lbl2.Text = "Живых клеток: " + k;
-            ro2 = k / 100;
-            ro2 = Math.Round(ro2, 2);
-            lbl3.Text = "Щільність (%): " + ro2;
+            
         }
 
         private void timer1_Tick(object sender, EventArgs e)
         {
-            k = 0;
+            g = pctr1.CreateGraphics();
+            cellCount = 0;
             for (int i = 0; i < 100; i++)
             {
                 for (int j = 0; j < 100; j++)
                 {
-                    if (b[i, j] == 0)
+                    if (cellsFuture[i, j] == 0)
                     {
-                        g.FillRectangle(Brushes.White, i * 7 + 1, j * 7 + 1, 6, 6);
+                        g.FillRectangle(Brushes.White, i * elementSize + lineWidth, j * elementSize + lineWidth, cellSize, cellSize);
                     }
                     else
                     {
-                        if (col != 9)
+                        if (colourCount != 9)
                         {
-                            if (b[i, j] == 1)
-                                g.FillRectangle(Brushes.Blue, i * 7 + 1, j * 7 + 1, 6, 6);
-                            if (b[i, j] == 2)
-                                g.FillRectangle(Brushes.Red, i * 7 + 1, j * 7 + 1, 6, 6);
-                            k++;
+                            if (cellsFuture[i, j] == 1)
+                                g.FillRectangle(Brushes.Blue, i * elementSize + lineWidth, j * elementSize + lineWidth, cellSize, cellSize);
+                            if (cellsFuture[i, j] == 2)
+                                g.FillRectangle(Brushes.Red, i * elementSize + lineWidth, j * elementSize + lineWidth, cellSize, cellSize);
+                            cellCount++;
                         }
                         else
                         {
-                            SolidBrush br = new SolidBrush(Color.FromArgb(255 - 31 * (b[i, j] - 1), 255 - 31 * (b[i, j] - 1), 31 * (b[i, j] - 1)));
-                            if (b[i, j] == 3)
+                            SolidBrush br = new SolidBrush(Color.FromArgb(255 - 31 * (cellsFuture[i, j] - 1), 255 - 31 * (cellsFuture[i, j] - 1), 31 * (cellsFuture[i, j] - 1)));
+                            if (cellsFuture[i, j] == 3)
                                 br.Color = Color.Red;
-                            if (b[i, j] == 4)
+                            if (cellsFuture[i, j] == 4)
                                 br.Color = Color.DarkOrange;
-                            if (b[i, j] == 1)
+                            if (cellsFuture[i, j] == 1)
                                 br.Color = Color.Black;
-                            if (b[i, j] == 2)
+                            if (cellsFuture[i, j] == 2)
                                 br.Color = Color.MidnightBlue;
-                            g.FillRectangle(br, i * 7 + 1, j * 7 + 1, 6, 6);
-                            k++;
+                            g.FillRectangle(br, i * elementSize + lineWidth, j * elementSize + lineWidth, cellSize, cellSize);
+                            cellCount++;
                         }
                     }
                 }
             }
-            lbl2.Text = "Живих клітин: " + k;
-            ro2 = k / 100;
-            ro2 = Math.Round(ro2, 2);
-            lbl3.Text = "Щільність (%): " + ro2;
-            Array.Copy(b, a, 10000);
-            if ((xod % 2 == 1) | (chkbx1.Checked == false))
+            lbl2.Text = cellCount.ToString();
+            density = cellCount / 100;
+            density = Math.Round(density, 2);
+            lbl3.Text = density.ToString();
+            Array.Copy(cellsFuture, cells, 10000);
+            if ((cycleNumber % 2 == 1) | (chkbx1.Checked == false))
             {
                 for (int i = 0; i < 100; i++)
                 {
                     for (int j = 0; j < 100; j++)
                     {
-                        s = 0;
-                        if ((i == 0) | (j == 0))
+                        neighborCount = 0;
+                        blueNeighborCount = 0;
+                        redNeighborCount = 0;
+                        for (int t = 0; t < 3; t++)
                         {
-                            if (i == 0)
+                            for (int s = 0; s < 3; s++)
                             {
-                                if (j == 0)
+                                if ((cells[((i + t) + 99) % 100, ((j + s) + 99) % 100] != 0) && ((t != 1) || (s != 1)))
                                 {
-                                    if (a[99, 99] != 0)
-                                    { s++; l.Add(a[99, 99]); }
-                                    if (a[i, 99] != 0)
-                                    { s++; l.Add(a[i, 99]); }
-                                    if (a[(i + 1) % 100, 99] != 0)
-                                    { s++; l.Add(a[(i + 1) % 100, 99]); }
-                                    if (a[99, j] != 0)
-                                    { s++; l.Add(a[99, j]); }
-                                    if (a[99, (j + 1) % 100] != 0)
-                                    { s++; l.Add(a[99, (j + 1) % 100]); }
-                                    if (a[i, (j + 1) % 100] != 0)
-                                    { s++; l.Add(a[i, (j + 1) % 100]); }
-                                    if (a[(i + 1) % 100, j] != 0)
-                                    { s++; l.Add(a[(i + 1) % 100, j]); }
-                                    if (a[(i + 1) % 100, (j + 1) % 100] != 0)
-                                    { s++; l.Add(a[(i + 1) % 100, (j + 1) % 100]); }
-                                    if (col == 2)
-                                    {
-                                        if (a[99, 99] == 1)
-                                            ss++;
-                                        if (a[99, 99] == 2)
-                                            sk++;
-                                        if (a[i, 99] == 1)
-                                            ss++;
-                                        if (a[i, 99] == 2)
-                                            sk++;
-                                        if (a[(i + 1) % 100, 99] == 1)
-                                            ss++;
-                                        if (a[(i + 1) % 100, 99] == 2)
-                                            sk++;
-                                        if (a[99, j] == 1)
-                                            ss++;
-                                        if (a[99, j] == 2)
-                                            sk++;
-                                        if (a[99, (j + 1) % 100] == 1)
-                                            ss++;
-                                        if (a[99, (j + 1) % 100] == 2)
-                                            sk++;
-                                        if (a[i, (j + 1) % 100] == 1)
-                                            ss++;
-                                        if (a[i, (j + 1) % 100] == 2)
-                                            sk++;
-                                        if (a[(i + 1) % 100, j] == 1)
-                                            ss++;
-                                        if (a[(i + 1) % 100, j] == 2)
-                                            sk++;
-                                        if (a[(i + 1) % 100, (j + 1) % 100] == 1)
-                                            ss++;
-                                        if (a[(i + 1) % 100, (j + 1) % 100] == 2)
-                                            sk++;
-                                    }
-                                }
-                                else
-                                {
-                                    if (a[99, j - 1] != 0)
-                                    { s++; l.Add(a[99, j - 1]); }
-                                    if (a[i, j - 1] != 0)
-                                    { s++; l.Add(a[i, j - 1]); }
-                                    if (a[(i + 1) % 100, j - 1] != 0)
-                                    { s++; l.Add(a[(i + 1) % 100, j - 1]); }
-                                    if (a[99, j] != 0)
-                                    { s++; l.Add(a[99, j]); }
-                                    if (a[99, (j + 1) % 100] != 0)
-                                    { s++; l.Add(a[99, (j + 1) % 100]); }
-                                    if (a[i, (j + 1) % 100] != 0)
-                                    { s++; l.Add(a[i, (j + 1) % 100]); }
-                                    if (a[(i + 1) % 100, j] != 0)
-                                    { s++; l.Add(a[(i + 1) % 100, j]); }
-                                    if (a[(i + 1) % 100, (j + 1) % 100] != 0)
-                                    { s++; l.Add(a[(i + 1) % 100, (j + 1) % 100]); }
-                                    if (col == 2)
-                                    {
-                                        if (a[99, j - 1] == 1)
-                                            ss++;
-                                        if (a[99, j - 1] == 2)
-                                            sk++;
-                                        if (a[i, j - 1] == 1)
-                                            ss++;
-                                        if (a[i, j - 1] == 2)
-                                            sk++;
-                                        if (a[(i + 1) % 100, j - 1] == 1)
-                                            ss++;
-                                        if (a[(i + 1) % 100, j - 1] == 2)
-                                            sk++;
-                                        if (a[99, j] == 1)
-                                            ss++;
-                                        if (a[99, j] == 2)
-                                            sk++;
-                                        if (a[99, (j + 1) % 100] == 1)
-                                            ss++;
-                                        if (a[99, (j + 1) % 100] == 2)
-                                            sk++;
-                                        if (a[i, (j + 1) % 100] == 1)
-                                            ss++;
-                                        if (a[i, (j + 1) % 100] == 2)
-                                            sk++;
-                                        if (a[(i + 1) % 100, j] == 1)
-                                            ss++;
-                                        if (a[(i + 1) % 100, j] == 2)
-                                            sk++;
-                                        if (a[(i + 1) % 100, (j + 1) % 100] == 1)
-                                            ss++;
-                                        if (a[(i + 1) % 100, (j + 1) % 100] == 2)
-                                            sk++;
-                                    }
-                                }
-                            }
-                            else
-                            {
-                                if (j == 0)
-                                {
-                                    if (a[i - 1, 99] != 0)
-                                    { s++; l.Add(a[i - 1, 99]); }
-                                    if (a[i, 99] != 0)
-                                    { s++; l.Add(a[i, 99]); }
-                                    if (a[(i + 1) % 100, 99] != 0)
-                                    { s++; l.Add(a[(i + 1) % 100, 99]); }
-                                    if (a[i - 1, j] != 0)
-                                    { s++; l.Add(a[i - 1, j]); }
-                                    if (a[i - 1, (j + 1) % 100] != 0)
-                                    { s++; l.Add(a[i - 1, (j + 1) % 100]); }
-                                    if (a[i, (j + 1) % 100] != 0)
-                                    { s++; l.Add(a[i, (j + 1) % 100]); }
-                                    if (a[(i + 1) % 100, j] != 0)
-                                    { s++; l.Add(a[(i + 1) % 100, j]); }
-                                    if (a[(i + 1) % 100, (j + 1) % 100] != 0)
-                                    { s++; l.Add(a[(i + 1) % 100, (j + 1) % 100]); }
-                                    if (col == 2)
-                                    {
-                                        if (a[i - 1, 99] == 1)
-                                            ss++;
-                                        if (a[i - 1, 99] == 2)
-                                            sk++;
-                                        if (a[i, 99] == 1)
-                                            ss++;
-                                        if (a[i, 99] == 2)
-                                            sk++;
-                                        if (a[(i + 1) % 100, 99] == 1)
-                                            ss++;
-                                        if (a[(i + 1) % 100, 99] == 2)
-                                            sk++;
-                                        if (a[i - 1, j] == 1)
-                                            ss++;
-                                        if (a[i - 1, j] == 2)
-                                            sk++;
-                                        if (a[i - 1, (j + 1) % 100] == 1)
-                                            ss++;
-                                        if (a[i - 1, (j + 1) % 100] == 2)
-                                            sk++;
-                                        if (a[i, (j + 1) % 100] == 1)
-                                            ss++;
-                                        if (a[i, (j + 1) % 100] == 2)
-                                            sk++;
-                                        if (a[(i + 1) % 100, j] == 1)
-                                            ss++;
-                                        if (a[(i + 1) % 100, j] == 2)
-                                            sk++;
-                                        if (a[(i + 1) % 100, (j + 1) % 100] == 1)
-                                            ss++;
-                                        if (a[(i + 1) % 100, (j + 1) % 100] == 2)
-                                            sk++;
-                                    }
+                                    neighborCount++;
                                 }
                             }
                         }
-                        else
+
+                        if (colourCount != 9)
                         {
-                            if (a[i - 1, j - 1] != 0)
-                            { s++; l.Add(a[i - 1, j - 1]); }
-                            if (a[i, j - 1] != 0)
-                            { s++; l.Add(a[i, j - 1]); }
-                            if (a[(i + 1) % 100, j - 1] != 0)
-                            { s++; l.Add(a[(i + 1) % 100, j - 1]); }
-                            if (a[i - 1, j] != 0)
-                            { s++; l.Add(a[i - 1, j]); }
-                            if (a[i - 1, (j + 1) % 100] != 0)
-                            { s++; l.Add(a[i - 1, (j + 1) % 100]); }
-                            if (a[i, (j + 1) % 100] != 0)
-                            { s++; l.Add(a[i, (j + 1) % 100]); }
-                            if (a[(i + 1) % 100, j] != 0)
-                            { s++; l.Add(a[(i + 1) % 100, j]); }
-                            if (a[(i + 1) % 100, (j + 1) % 100] != 0)
-                            { s++; l.Add(a[(i + 1) % 100, (j + 1) % 100]); }
-                            if (col == 2)
+                            if (neighborCount == 3)
                             {
-                                if (a[i - 1, j - 1] == 1)
-                                    ss++;
-                                if (a[i - 1, j - 1] == 2)
-                                    sk++;
-                                if (a[i, j - 1] == 1)
-                                    ss++;
-                                if (a[i, j - 1] == 2)
-                                    sk++;
-                                if (a[(i + 1) % 100, j - 1] == 1)
-                                    ss++;
-                                if (a[(i + 1) % 100, j - 1] == 2)
-                                    sk++;
-                                if (a[i - 1, j] == 1)
-                                    ss++;
-                                if (a[i - 1, j] == 2)
-                                    sk++;
-                                if (a[i - 1, (j + 1) % 100] == 1)
-                                    ss++;
-                                if (a[i - 1, (j + 1) % 100] == 2)
-                                    sk++;
-                                if (a[i, (j + 1) % 100] == 1)
-                                    ss++;
-                                if (a[i, (j + 1) % 100] == 2)
-                                    sk++;
-                                if (a[(i + 1) % 100, j] == 1)
-                                    ss++;
-                                if (a[(i + 1) % 100, j] == 2)
-                                    sk++;
-                                if (a[(i + 1) % 100, (j + 1) % 100] == 1)
-                                    ss++;
-                                if (a[(i + 1) % 100, (j + 1) % 100] == 2)
-                                    sk++;
-                            }
-                        }
-                        if (col != 9)
-                        {
-                            if ((s == 3) & (a[i, j] == 0))
-                            {
-                                if (col == 1)
-                                    b[i, j] = 1;
+                                if (colourCount == 1)
+                                    cellsFuture[i, j] = 1;
                                 else
                                 {
-                                    if (ss > sk)
-                                        b[i, j] = 1;
+                                    for (int t = 0; t < 3; t++)
+                                    {
+                                        for (int s = 0; s < 3; s++)
+                                        {
+                                            if ((cells[((i + t) + 99) % 100, ((j + s) + 99) % 100] == 1) && ((t != 1) || (s != 1)))
+                                            {
+                                                blueNeighborCount++;
+                                            }
+                                            if ((cells[((i + t) + 99) % 100, ((j + s) + 99) % 100] == 2) && ((t != 1) || (s != 1)))
+                                            {
+                                                redNeighborCount++;
+                                            }
+                                        }
+                                    }
+                                    if (blueNeighborCount > redNeighborCount)
+                                        cellsFuture[i, j] = 1;
                                     else
-                                        b[i, j] = 2;
-                                    ss = 0;
-                                    sk = 0;
+                                        cellsFuture[i, j] = 2;
                                 }
                             }
-                            else
-                                b[i, j] = a[i, j];
-                            if (s == 2)
-                                b[i, j] = a[i, j];
-                            if ((s != 2) & (s != 3))
-                                b[i, j] = 0;
+                            if (neighborCount == 2)
+                                cellsFuture[i, j] = cells[i, j];
+                            if ((neighborCount != 2) & (neighborCount != 3))
+                                cellsFuture[i, j] = 0;
                         }
                         else
                         {
-                            if ((s == 3) & (a[i, j] != 4))
+                            if (cells[i, j] == 0)
                             {
-                                b[i, j] = l[r.Next(0, 3)];
+                                if (neighborCount == 3)
+                                {
+                                    for (int t = 0; t < 3; t++)
+                                    {
+                                        for (int s = 0; s < 3; s++)
+                                        {
+                                            int n = r.Next(0, 3);
+                                            int k = 0;
+                                            if (cells[((i + t) + 99) % 100, ((j + s) + 99) % 100] != 0)
+                                            {
+                                                if (k == n)
+                                                    cellsFuture[i, j] = cells[((i + t) + 99) % 100, ((j + s) + 99) % 100];
+                                                else
+                                                    k++;
+                                            }
+                                        }
+                                    }
+                                }
                             }
-                            if ((s != a[i, j] - 1) & (a[i, j] != 0))
+                            else
                             {
-                                b[i, j] = 0;
-                            }
-                            if (s == a[i, j] - 1)
-                            {
-                                b[i, j] = a[i, j];
+                                if ((cells[i, j] != neighborCount + 1) && (cells[i, j] != neighborCount + 2))
+                                {
+                                    cellsFuture[i, j] = 0;
+                                }
+                                else
+                                {
+                                    cellsFuture[i, j] = cells[i, j];
+                                }
                             }
                         }
-                        l.Clear();
                     }
                 }
             }
             else
             {
-                for (int i = 1; i < 99; i++)
+                for (int i = 0; i < 100; i++)
                 {
-                    for (int j = 1; j < 99; j++)
+                    for (int j = 0; j < 100; j++)
                     {
-                        s = 0;
-                        if (a[i - 1, j - 1] != 0)
-                            s++;
-                        if (a[i, j - 1] != 0)
-                            s++;
-                        if (a[(i + 1) % 100, j - 1] != 0)
-                            s++;
-                        if (a[i - 1, j] != 0)
-                            s++;
-                        if (a[i - 1, (j + 1) % 100] != 0)
-                            s++;
-                        if (a[i, (j + 1) % 100] != 0)
-                            s++;
-                        if (a[(i + 1) % 100, j] != 0)
-                            s++;
-                        if (a[(i + 1) % 100, (j + 1) % 100] != 0)
-                            s++;
-                        w[i, j] = s;
-                    }
-                }
-                for (int i2 = 3; i2 < 98; i2++)
-                {
-                    for (int j2 = 3; j2 < 98; j2++)
-                    {
-                        for (int i = i2 - 2; i < i2 + 2; i++)
+                        neighborCount = 0;
+                        blueNeighborCount = 0;
+                        redNeighborCount = 0;
+                        for (int t = 0; t < 3; t++)
                         {
-                            for (int j = j2 - 2; j < j2 + 2; j++)
+                            for (int s = 0; s < 3; s++)
                             {
-                                s = 0;
-                                if (a[i - 1, j - 1] != 0)
-                                    s++;
-                                if (a[i, j - 1] != 0)
-                                    s++;
-                                if (a[(i + 1) % 100, j - 1] != 0)
-                                    s++;
-                                if (a[i - 1, j] != 0)
-                                    s++;
-                                if (a[i - 1, (j + 1) % 100] != 0)
-                                    s++;
-                                if (a[i, (j + 1) % 100] != 0)
-                                    s++;
-                                if (a[(i + 1) % 100, j] != 0)
-                                    s++;
-                                if (a[(i + 1) % 100, (j + 1) % 100] != 0)
-                                    s++;
-                                w[i, j] = s;
+                                if ((cells[((i + t) + 99) % 100, ((j + s) + 99) % 100] != 0) && ((t != 1) || (s != 1)))
+                                {
+                                    neighborCount++;
+                                }
                             }
                         }
-                        if (a[i2, j2] != 0)
+                        neighbors[i, j] = neighborCount;
+                    }
+                }
+
+                for (int i = 0; i < 100; i++)
+                {
+                    for (int j = 0; j < 100; j++)
+                    {
+                        if ((cells[i, j] != 0) && (neighbors[i, j] != 2) && (neighbors[i, j] != 3))
                         {
-                            if (((a[i2, j2] - 1 == w[i2, j2]) & (col == 9)) | (((4 == w[i2, j2]) | (3 == w[i2, j2])) & (col != 9)))
-                            { b[i2, j2] = a[i2, j2]; break; }
-                            if (((a[i2, j2] == w[i2 - 1, j2 - 1]) & (col == 9)) | ((((4 == w[i2 - 1, j2 - 1]) | (3 == w[i2 - 1, j2 - 1])) & (col != 9)) & (a[i2 - 1, j2 - 1] == 0) & (b[i2 - 1, j2 - 1] == 0)))
-                            { b[i2 - 1, j2 - 1] = a[i2, j2]; a[i2, j2] = 0; b[i2, j2] = 0; break; }
-                            if (((a[i2, j2] == w[i2 - 1, j2]) & (col == 9)) | ((((4 == w[i2 - 1, j2]) | (3 == w[i2 - 1, j2])) & (col != 9)) & (a[i2 - 1, j2] == 0) & (b[i2 - 1, j2] == 0)))
-                            { b[i2 - 1, j2] = a[i2, j2]; a[i2, j2] = 0; b[i2, j2] = 0; break; }
-                            if (((a[i2, j2] == w[i2 - 1, j2 + 1]) & (col == 9)) | ((((4 == w[i2 - 1, j2 + 1]) | (3 == w[i2 - 1, j2 + 1])) & (col != 9)) & (a[i2 - 1, j2 + 1] == 0) & (b[i2 - 1, j2 + 1] == 0)))
-                            { b[i2 - 1, j2 + 1] = a[i2, j2]; a[i2, j2] = 0; b[i2, j2] = 0; break; }
-                            if (((a[i2, j2] == w[i2, j2 - 1]) & (col == 9)) | ((((4 == w[i2, j2 - 1]) | (3 == w[i2, j2 - 1])) & (col != 9)) & (a[i2, j2 - 1] == 0) & (b[i2, j2 - 1] == 0)))
-                            { b[i2, j2 - 1] = a[i2, j2]; a[i2, j2] = 0; b[i2, j2] = 0; break; }
-                            if (((a[i2, j2] == w[i2, j2 + 1]) & (col == 9)) | ((((4 == w[i2, j2 + 1]) | (3 == w[i2, j2 + 1])) & (col != 9)) & (a[i2, j2 + 1] == 0) & (b[i2, j2 + 1] == 0)))
-                            { b[i2, j2 + 1] = a[i2, j2]; a[i2, j2] = 0; b[i2, j2] = 0; break; }
-                            if (((a[i2, j2] == w[i2 + 1, j2 - 1]) & (col == 9)) | ((((4 == w[i2 + 1, j2 - 1]) | (3 == w[i2 + 1, j2 - 1])) & (col != 9)) & (a[i2 + 1, j2 - 1] == 0) & (b[i2 + 1, j2 - 1] == 0)))
-                            { b[i2 + 1, j2 - 1] = a[i2, j2]; a[i2, j2] = 0; b[i2, j2] = 0; break; }
-                            if (((a[i2, j2] == w[i2 + 1, j2]) & (col == 9)) | ((((4 == w[i2 + 1, j2]) | (3 == w[i2 + 1, j2])) & (col != 9)) & (a[i2 + 1, j2] == 0) & (b[i2 + 1, j2] == 0)))
-                            { b[i2 + 1, j2] = a[i2, j2]; a[i2, j2] = 0; b[i2, j2] = 0; break; }
-                            if (((a[i2, j2] == w[i2 + 1, j2 + 1]) & (col == 9)) | ((((4 == w[i2 + 1, j2 + 1]) | (3 == w[i2 + 1, j2 + 1])) & (col != 9)) & (a[i2 + 1, j2 + 1] == 0) & (b[i2 + 1, j2 + 1] == 0)))
-                            { b[i2 + 1, j2 + 1] = a[i2, j2]; a[i2, j2] = 0; b[i2, j2] = 0; break; }
+                            for (int t = 0; t < 3; t++)
+                            {
+                                for (int s = 0; s < 3; s++)
+                                {
+                                    if (((neighbors[((i + t) + 99) % 100, ((j + s) + 99) % 100] == 4) || 
+                                        (neighbors[((i + t) + 99) % 100, ((j + s) + 99) % 100] == 3)) && 
+                                        (cells[((i + t) + 99) % 100, ((j + s) + 99) % 100] == 0) && ((t != 1) || (s != 1)))
+                                    {
+                                        cells[((i + t) + 99) % 100, ((j + s) + 99) % 100] = cells[i, j];
+                                        cells[i, j] = 0;
+                                    }
+                                    neighbors[(i + 99) % 100, (j + 99) % 100]--;
+                                    neighbors[i, (j + 99) % 100]--;
+                                    neighbors[(i + 1) % 100, (j + 99) % 100]--;
+                                    neighbors[(i + 99) % 100, j]--;
+                                    neighbors[i, j]--;
+                                    neighbors[(i + 1) % 100, j]--;
+                                    neighbors[(i + 99) % 100, (j + 1) % 100]--;
+                                    neighbors[i, (j + 1) % 100]--;
+                                    neighbors[(i + 1) % 100, (j + 1) % 100]--;
+
+                                    neighbors[((i + t) + 98) % 100, ((j + s) + 98) % 100]++;
+                                    neighbors[((i + t) + 99) % 100, ((j + s) + 98) % 100]++;
+                                    neighbors[(i + t) % 100, ((j + s) + 98) % 100]++;
+                                    neighbors[((i + t) + 98) % 100, ((j + s) + 99) % 100]++;
+                                    neighbors[((i + t) + 99) % 100, ((j + s) + 99) % 100]++;
+                                    neighbors[(i + t) % 100, ((j + s) + 99) % 100]++;
+                                    neighbors[((i + t) + 98) % 100, (j + s) % 100]++;
+                                    neighbors[((i + t) + 99) % 100, (j + s) % 100]++;
+                                    neighbors[(i + t) % 100, (j + s) % 100]++;
+                                }
+                            }
                         }
                     }
                 }
             }
-            xod++;
-            lbl1.Text = "Ходів: " + xod;
+            cycleNumber++;
+            lbl1.Text = cycleNumber.ToString();
             if (chkbx1.Checked == true)
-                lbl1.Text = "Ходів: " + (xod / 2);
-            ro2 = k / 100;
-            ro2 = Math.Round(ro2, 2);
-            lbl3.Text = "Щільність (%): " + ro2;
+                lbl1.Text = (cycleNumber / 2).ToString();
+            density = cellCount / 100;
+            density = Math.Round(density, 2);
+            lbl3.Text = density.ToString();
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
+            pctr1.BringToFront();
             timer1.Stop();
-            k = 0;
-            xod = 0;
-            lbl2.Text = "Живих клітин: " + k;
-            lbl1.Text = "Ходів: " + xod;
-            ro2 = k / 100;
-            ro2 = Math.Round(ro2, 2);
-            lbl3.Text = "Щільність (%): " + ro2;
+            cellCount = 0;
+            cycleNumber = 0;
+            lbl2.Text = cellCount.ToString();
+            lbl1.Text = cycleNumber.ToString();
+            density = cellCount / 100;
+            density = Math.Round(density, 2);
+            lbl3.Text = density.ToString();
             g = pctr1.CreateGraphics();
             g.Clear(Color.White);
             for (int i = 0; i < 101; i++)
@@ -532,9 +291,8 @@ namespace Життя
                 g.DrawLine(Pens.Black, 0, i * 7, pctr1.Height - 1, i * 7);
             }
             btn1.Visible = true;
-            d = 1;
-            Array.Clear(a, 0, 10000);
-            Array.Clear(b, 0, 10000);
+            Array.Clear(cells, 0, 10000);
+            Array.Clear(cellsFuture, 0, 10000);
             openFileDialog1.InitialDirectory = Application.StartupPath;
             openFileDialog1.Filter = "Файли TXT (*.txt)|*.txt";
             openFileDialog1.FileName = "0000.txt";
@@ -544,11 +302,11 @@ namespace Життя
                 string[] ast = File.ReadAllLines(filename, Encoding.UTF8);
                 if ((ast[0] == "1") | (ast[0] == "3"))
                 {
-                    col = 1;
+                    colourCount = 1;
                 }
                 else
                 {
-                    col = 2;
+                    colourCount = 2;
                 }
                 for (int i = 1; i <= 100; i++)
                 {
@@ -557,29 +315,22 @@ namespace Життя
                     {
                         if (st1[j] == '1')
                         {
-                            g.FillRectangle(Brushes.Blue, (i - 1) * 7 + 1, j * 7 + 1, 6, 6);
-                            a[i - 1, j] = 1;
-                            b[i - 1, j] = 1;
-                            k++;
+                            g.FillRectangle(Brushes.Blue, (i - 1) * elementSize + lineWidth, j * elementSize + lineWidth, cellSize, cellSize);
+                            cells[i - 1, j] = 1;
+                            cellsFuture[i - 1, j] = 1;
+                            cellCount++;
                         }
                         if (st1[j] == '2')
                         {
-                            g.FillRectangle(Brushes.Red, (i - 1) * 7 + 1, j * 7 + 1, 6, 6);
-                            a[i - 1, j] = 2;
-                            b[i - 1, j] = 2;
-                            k++;
+                            g.FillRectangle(Brushes.Red, (i - 1) * elementSize + lineWidth, j * elementSize + lineWidth, cellSize, cellSize);
+                            cells[i - 1, j] = 2;
+                            cellsFuture[i - 1, j] = 2;
+                            cellCount++;
                         }
-                        if (st1[j] == '3')
-                        {
-                            g.FillRectangle(Brushes.Green, (i - 1) * 7 + 1, j * 7 + 1, 6, 6);
-                            a[i - 1, j] = 3;
-                            b[i - 1, j] = 3;
-                            k++;
-                        }
-                        lbl2.Text = "Живих клітик: " + k;
-                        ro2 = k / 100;
-                        ro2 = Math.Round(ro2, 2);
-                        lbl3.Text = "Щільність (%): " + ro2;
+                        lbl2.Text = cellCount.ToString();
+                        density = cellCount / 100;
+                        density = Math.Round(density, 2);
+                        lbl3.Text = density.ToString();
                     }
                 }
             }
@@ -603,16 +354,16 @@ namespace Життя
 
         private void rdBtn4_CheckedChanged(object sender, EventArgs e)
         {
-            col = 2;
+            colourCount = 2;
             timer1.Stop();
             btn4.Visible = true;
-            k = 0;
-            xod = 0;
-            lbl2.Text = "Живих клітин: " + k;
-            ro2 = k / 100;
-            ro2 = Math.Round(ro2, 2);
-            lbl3.Text = "Щільність (%): " + ro2;
-            lbl1.Text = "Ходів: " + xod;
+            cellCount = 0;
+            cycleNumber = 0;
+            lbl2.Text = cellCount.ToString();
+            density = cellCount / 100;
+            density = Math.Round(density, 2);
+            lbl3.Text = density.ToString();
+            lbl1.Text = cycleNumber.ToString();
             g = pctr1.CreateGraphics();
             g.Clear(Color.White);
             for (int i = 0; i < 101; i++)
@@ -621,9 +372,8 @@ namespace Життя
                 g.DrawLine(Pens.Black, 0, i * 7, pctr1.Height - 1, i * 7);
             }
             btn1.Visible = true;
-            d = 1;
-            Array.Clear(a, 0, 10000);
-            Array.Clear(b, 0, 10000);
+            Array.Clear(cells, 0, 10000);
+            Array.Clear(cellsFuture, 0, 10000);
             if (rdBtn5.Checked == true)
             {
                 rdBtn1.Checked = true;
@@ -636,15 +386,15 @@ namespace Життя
         private void rdBtn4_CheckedChanged_1(object sender, EventArgs e)
         {
             timer1.Stop();
-            col = 1;
+            colourCount = 1;
             btn4.Visible = true;
-            k = 0;
-            xod = 0;
-            lbl2.Text = "Живих клітин: " + k;
-            ro2 = k / 100;
-            ro2 = Math.Round(ro2, 2);
-            lbl3.Text = "Щільність (%): " + ro2;
-            lbl1.Text = "Ходів: " + xod;
+            cellCount = 0;
+            cycleNumber = 0;
+            lbl2.Text = cellCount.ToString();
+            density = cellCount / 100;
+            density = Math.Round(density, 2);
+            lbl3.Text = density.ToString();
+            lbl1.Text = cycleNumber.ToString();
             g = pctr1.CreateGraphics();
             g.Clear(Color.White);
             for (int i = 0; i < 101; i++)
@@ -653,9 +403,8 @@ namespace Життя
                 g.DrawLine(Pens.Black, 0, i * 7, pctr1.Height - 1, i * 7);
             }
             btn1.Visible = true;
-            d = 1;
-            Array.Clear(a, 0, 10000);
-            Array.Clear(b, 0, 10000);
+            Array.Clear(cells, 0, 10000);
+            Array.Clear(cellsFuture, 0, 10000);
             if (rdBtn4.Checked == true)
             {
                 rdBtn1.Checked = true;
@@ -668,15 +417,15 @@ namespace Життя
         private void rdBtn6_CheckedChanged(object sender, EventArgs e)
         {
             timer1.Stop();
-            col = 3;
+            colourCount = 3;
             btn4.Visible = true;
-            k = 0;
-            xod = 0;
-            lbl2.Text = "Живих клітин: " + k;
-            ro2 = k / 100;
-            ro2 = Math.Round(ro2, 2);
-            lbl3.Text = "Щільність (%): " + ro2;
-            lbl1.Text = "Ходів: " + xod;
+            cellCount = 0;
+            cycleNumber = 0;
+            lbl2.Text = cellCount.ToString();
+            density = cellCount / 100;
+            density = Math.Round(density, 2);
+            lbl3.Text = density.ToString();
+            lbl1.Text = cycleNumber.ToString();
             g = pctr1.CreateGraphics();
             g.Clear(Color.White);
             for (int i = 0; i < 101; i++)
@@ -685,32 +434,31 @@ namespace Життя
                 g.DrawLine(Pens.Black, 0, i * 7, pctr1.Height - 1, i * 7);
             }
             btn1.Visible = true;
-            d = 1;
-            Array.Clear(a, 0, 10000);
-            Array.Clear(b, 0, 10000);
+            Array.Clear(cells, 0, 10000);
+            Array.Clear(cellsFuture, 0, 10000);
         }
 
         private void btn4_Click(object sender, EventArgs e)
         {
             saveFileDialog1.InitialDirectory = Application.StartupPath;
             saveFileDialog1.Filter = "Файли TXT (*.txt)|*.txt";
-            saveFileDialog1.FileName = "Нове життя.txt";
+            saveFileDialog1.FileName = "New Life.txt";
             if (saveFileDialog1.ShowDialog() == DialogResult.OK)
             {
                 filename = saveFileDialog1.FileName;
                 StreamWriter sw = new StreamWriter(filename);
-                if (col == 1)
+                if (colourCount == 1)
                     sw.Write("1");
-                if (col == 2)
+                if (colourCount == 2)
                     sw.Write("2");
-                if (col == 9)
+                if (colourCount == 9)
                     sw.Write("9");
                 for (int i = 0; i <= 99; i++)
                 {
-                    sw.WriteLine("");
+                    sw.WriteLine();
                     for (int j = 0; j <= 99; j++)
                     {
-                        sw.Write(a[i, j].ToString());
+                        sw.Write(cells[i, j].ToString());
                     }
                 }
                 sw.Close();
@@ -729,16 +477,16 @@ namespace Життя
 
         private void rdBtn7_CheckedChanged(object sender, EventArgs e)
         {
-            col = 9;
+            colourCount = 9;
             timer1.Stop();
             btn4.Visible = true;
-            k = 0;
-            xod = 0;
-            lbl2.Text = "Живих клітин: " + k;
-            ro2 = k / 100;
-            ro2 = Math.Round(ro2, 2);
-            lbl3.Text = "Щільність (%): " + ro2;
-            lbl1.Text = "Ходів: " + xod;
+            cellCount = 0;
+            cycleNumber = 0;
+            lbl2.Text = cellCount.ToString();
+            density = cellCount / 100;
+            density = Math.Round(density, 2);
+            lbl3.Text = density.ToString();
+            lbl1.Text = cycleNumber.ToString();
             g = pctr1.CreateGraphics();
             g.Clear(Color.White);
             for (int i = 0; i < 101; i++)
@@ -747,10 +495,9 @@ namespace Життя
                 g.DrawLine(Pens.Black, 0, i * 7, pctr1.Height - 1, i * 7);
             }
             btn1.Visible = true;
-            d = 1;
-            Array.Clear(a, 0, 10000);
-            Array.Clear(b, 0, 10000);
-            if (rdBtn7.Checked == true)
+            Array.Clear(cells, 0, 10000);
+            Array.Clear(cellsFuture, 0, 10000);
+            if (rdBtn7.Checked)
             {
                 txtBx1.Visible = true;
                 grpBx1.Visible = false;
@@ -759,30 +506,33 @@ namespace Життя
 
         private void rdBtn1_CheckedChanged(object sender, EventArgs e)
         {
-
+            if (rdBtn1.Checked)
+                enteringColour = 1;
+            else
+                enteringColour = 2;
         }
 
         private void btn6_Click(object sender, EventArgs e)
         {
+            pctr1.BringToFront();
             timer1.Stop();
-            k = 0;
-            xod = 0;
-            lbl2.Text = "Живих клітин: " + k;
-            ro2 = k / 100;
-            ro2 = Math.Round(ro2, 2);
-            lbl3.Text = "Щільність (%): " + ro2;
-            lbl1.Text = "Ходів: " + xod;
+            cellCount = 0;
+            cycleNumber = 0;
+            lbl2.Text = cellCount.ToString();
+            density = cellCount / 100;
+            density = Math.Round(density, 2);
+            lbl3.Text = density.ToString();
+            lbl1.Text = cycleNumber.ToString();
             g = pctr1.CreateGraphics();
             g.Clear(Color.White);
             for (int i = 0; i < 101; i++)
             {
-                g.DrawLine(Pens.Black, i * 7, 0, i * 7, pctr1.Width - 1);
-                g.DrawLine(Pens.Black, 0, i * 7, pctr1.Height - 1, i * 7);
+                g.DrawLine(Pens.Black, i * elementSize, 0, i * elementSize, pctr1.Width - lineWidth);
+                g.DrawLine(Pens.Black, 0, i * elementSize, pctr1.Height - 1, i * elementSize);
             }
             btn1.Visible = true;
-            d = 1;
-            Array.Clear(a, 0, 10000);
-            Array.Clear(b, 0, 10000);
+            Array.Clear(cells, 0, 10000);
+            Array.Clear(cellsFuture, 0, 10000);
         }
 
         private void label2_Click(object sender, EventArgs e)
@@ -792,84 +542,92 @@ namespace Життя
 
         private void btn7_Click(object sender, EventArgs e)
         {
+            pctr1.BringToFront();
             timer1.Stop();
-            k = 0;
-            xod = 0;
-            lbl2.Text = "Живих клітин: " + k;
-            ro2 = k / 100;
-            ro2 = Math.Round(ro2, 2);
-            lbl3.Text = "Щільність (%): " + ro2;
-            lbl1.Text = "Ходів: " + xod;
+            cellCount = 0;
+            cycleNumber = 0;
+            lbl2.Text = cellCount.ToString();
+            density = cellCount / 100;
+            density = Math.Round(density, 2);
+            lbl3.Text = density.ToString();
+            lbl1.Text = cycleNumber.ToString();
             g = pctr1.CreateGraphics();
             g.Clear(Color.White);
             for (int i = 0; i < 101; i++)
             {
-                g.DrawLine(Pens.Black, i * 7, 0, i * 7, pctr1.Width - 1);
-                g.DrawLine(Pens.Black, 0, i * 7, pctr1.Height - 1, i * 7);
+                g.DrawLine(Pens.Black, i * elementSize, 0, i * elementSize, pctr1.Width - lineWidth);
+                g.DrawLine(Pens.Black, 0, i * elementSize, pctr1.Height - lineWidth, i * elementSize);
             }
             btn1.Visible = true;
-            d = 1;
-            Array.Clear(a, 0, 10000);
-            Array.Clear(b, 0, 10000);
-            int ro = int.Parse(txtBx2.Text);
-            int x;
-            for (int i = 0; i < 100; i++)
+            Array.Clear(cells, 0, 10000);
+            Array.Clear(cellsFuture, 0, 10000);
+            int ro = 0;
+            if (int.TryParse(txtBx2.Text, out ro))
             {
-                for (int j = 0; j < 100; j++)
+                int x;
+                for (int i = 0; i < 100; i++)
                 {
-                    x = r.Next(1, 101);
-                    if (x <= ro)
+                    for (int j = 0; j < 100; j++)
                     {
-                        x = r.Next(1, col + 1);
-                        a[i, j] = x;
-                        b[i, j] = x;
-                        k++;
-                    }
-                    else
-                    {
-                        a[i, j] = 0;
-                        b[i, j] = 0;
-                    }
-                }
-            }
-            lbl2.Text = "Живих клітин: " + k;
-            ro2 = k / 100;
-            ro2 = Math.Round(ro2, 2);
-            lbl3.Text = "Щільність (%): " + ro2;
-            for (int i = 0; i < 100; i++)
-            {
-                for (int j = 0; j < 100; j++)
-                {
-                    if (b[i, j] == 0)
-                    {
-                        g.FillRectangle(Brushes.White, i * 7 + 1, j * 7 + 1, 6, 6);
-                    }
-                    else
-                    {
-                        if (col != 9)
+                        x = r.Next(1, 101);
+                        if (x <= ro)
                         {
-                            if (b[i, j] == 1)
-                                g.FillRectangle(Brushes.Blue, i * 7 + 1, j * 7 + 1, 6, 6);
-                            if (b[i, j] == 2)
-                                g.FillRectangle(Brushes.Red, i * 7 + 1, j * 7 + 1, 6, 6);
-                            k++;
+                            x = r.Next(1, colourCount + 1);
+                            cells[i, j] = x;
+                            cellsFuture[i, j] = x;
+                            cellCount++;
                         }
                         else
                         {
-                            SolidBrush br = new SolidBrush(Color.FromArgb(255 - 31 * (b[i, j] - 1), 255 - 31 * (b[i, j] - 1), 31 * (b[i, j] - 1)));
-                            if (b[i, j] == 3)
-                                br.Color = Color.Red;
-                            if (b[i, j] == 4)
-                                br.Color = Color.DarkOrange;
-                            if (b[i, j] == 1)
-                                br.Color = Color.Black;
-                            if (b[i, j] == 2)
-                                br.Color = Color.MidnightBlue;
-                            g.FillRectangle(br, i * 7 + 1, j * 7 + 1, 6, 6);
-                            k++;
+                            cells[i, j] = 0;
+                            cellsFuture[i, j] = 0;
                         }
                     }
                 }
+                lbl2.Text = cellCount.ToString();
+                density = cellCount / 100;
+                density = Math.Round(density, 2);
+                lbl3.Text = density.ToString();
+                for (int i = 0; i < 100; i++)
+                {
+                    for (int j = 0; j < 100; j++)
+                    {
+                        if (cellsFuture[i, j] == 0)
+                        {
+                            g.FillRectangle(Brushes.White, i * elementSize + lineWidth, j * elementSize + lineWidth, cellSize, cellSize);
+                        }
+                        else
+                        {
+                            if (colourCount != 9)
+                            {
+                                if (cellsFuture[i, j] == 1)
+                                    g.FillRectangle(Brushes.Blue, i * elementSize + lineWidth, j * elementSize + lineWidth, cellSize, cellSize);
+                                if (cellsFuture[i, j] == 2)
+                                    g.FillRectangle(Brushes.Red, i * elementSize + lineWidth, j * elementSize + lineWidth, cellSize, cellSize);
+                                cellCount++;
+                            }
+                            else
+                            {
+                                SolidBrush br = new SolidBrush(Color.FromArgb(255 - 31 * (cellsFuture[i, j] - 1), 255 - 31 * (cellsFuture[i, j] - 1), 31 * (cellsFuture[i, j] - 1)));
+                                if (cellsFuture[i, j] == 3)
+                                    br.Color = Color.Red;
+                                if (cellsFuture[i, j] == 4)
+                                    br.Color = Color.DarkOrange;
+                                if (cellsFuture[i, j] == 1)
+                                    br.Color = Color.Black;
+                                if (cellsFuture[i, j] == 2)
+                                    br.Color = Color.MidnightBlue;
+                                g.FillRectangle(br, i * elementSize + lineWidth, j * elementSize + lineWidth, cellSize, cellSize);
+                                cellCount++;
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                MessageBox.Show("Enter number between 0 and 101");
+                txtBx2.Text = "20";
             }
         }
 
@@ -889,28 +647,96 @@ namespace Життя
 
         private void txtBx2_TextChanged(object sender, EventArgs e)
         {
-            if (txtBx2.Text != "")
-            {
-                int x = int.Parse(txtBx2.Text);
-                if ((x < 0) | (x > 100))
-                {
-                    MessageBox.Show("Введіть число від 0 до 100");
-                    txtBx2.Text = "20";
-                }
-            }
+            
         }
 
         private void txtBx1_TextChanged(object sender, EventArgs e)
         {
-            if (txtBx1.Text != "")
+            if (int.TryParse(txtBx1.Text, out enteredColour))
             {
-                int x = int.Parse(txtBx1.Text);
-                if ((x < 0) | (x > 8))
+                if ((enteredColour < 0) || (enteredColour > 8))
                 {
-                    MessageBox.Show("Введіть число від 0 до 8");
+                    MessageBox.Show("Enter number between 0 and 9");
                     txtBx1.Text = "3";
                 }
             }
+            else
+            {
+                MessageBox.Show("Enter number between 0 and 9");
+                txtBx1.Text = "3";
+            }
+        }
+
+        private void chkbx1_CheckedChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void timerEntering_Tick(object sender, EventArgs e)
+        {
+            Point p = this.Location;
+            int x = MousePosition.X - p.X - pctr1.Location.X - 3;
+            int y = MousePosition.Y - p.Y - pctr1.Location.Y - 3;
+            x = x / elementSize - 1;
+            y = y / elementSize - 4;
+            if ((x >= 0) & (x <= 99) & (y >= 0) & (y <= 99) & ((x != prevX) || (y != prevY)))
+            {
+                if (cells[x, y] == 0)
+                {
+                    if (colourCount != 9)
+                    {
+                        if (enteringColour == 1)
+                            g.FillRectangle(Brushes.Blue, x * elementSize + lineWidth, y * elementSize + lineWidth, cellSize, cellSize);
+                        if (enteringColour == 2)
+                            g.FillRectangle(Brushes.Red, x * elementSize + lineWidth, y * elementSize + 1, cellSize, cellSize);
+                        cells[x, y] = enteringColour;
+                        cellsFuture[x, y] = enteringColour;
+                    }
+                    else
+                    {
+                        //enteredColour = int.Parse(txtBx1.Text);
+                        SolidBrush br = new SolidBrush(Color.FromArgb(255 - 31 * enteredColour, 255 - 31 * enteredColour, 31 * enteredColour));
+                        enteredColour++;
+                        if (enteredColour == 3)
+                            br.Color = Color.Red;
+                        if (enteredColour == 4)
+                            br.Color = Color.DarkOrange;
+                        if (enteredColour == 1)
+                            br.Color = Color.Black;
+                        if (enteredColour == 2)
+                            br.Color = Color.MidnightBlue;
+                        g.FillRectangle(br, x * elementSize + lineWidth, y * elementSize + lineWidth, cellSize, cellSize);
+                        cells[x, y] = enteredColour;
+                        cellsFuture[x, y] = enteredColour;
+                    }
+                    cellCount++;
+                }
+                else
+                {
+                    g.FillRectangle(Brushes.White, x * elementSize + lineWidth, y * elementSize + 1, cellSize, cellSize);
+                    cells[x, y] = 0;
+                    cellsFuture[x, y] = 0;
+                    cellCount--;
+                }
+              prevX = x;
+              prevY = y;
+            }
+        }
+
+        private void pctr1_MouseUp(object sender, MouseEventArgs e)
+        {
+            timerEntering.Stop();
+            lbl2.Text = cellCount.ToString();
+            density = (cellCount / (fieldSize * fieldSize)) * 100;
+            density = Math.Round(density, 2);
+            lbl3.Text = density.ToString();
+            prevX = -1;
+            prevY = -1;
+        }
+
+        private void pctr1_MouseDown(object sender, MouseEventArgs e)
+        {
+            timerEntering.Start();
         }
     }
 }

@@ -55,9 +55,16 @@
             this.btn7 = new System.Windows.Forms.Button();
             this.txtBx2 = new System.Windows.Forms.TextBox();
             this.lbl3 = new System.Windows.Forms.Label();
+            this.pctr2 = new System.Windows.Forms.PictureBox();
+            this.label3 = new System.Windows.Forms.Label();
+            this.label4 = new System.Windows.Forms.Label();
+            this.label5 = new System.Windows.Forms.Label();
+            this.checkEntering = new System.Windows.Forms.CheckBox();
+            this.timerEntering = new System.Windows.Forms.Timer(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.pctr1)).BeginInit();
             this.grpBx1.SuspendLayout();
             this.groupBox1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pctr2)).BeginInit();
             this.SuspendLayout();
             // 
             // pctr1
@@ -68,6 +75,8 @@
             this.pctr1.TabIndex = 0;
             this.pctr1.TabStop = false;
             this.pctr1.Click += new System.EventHandler(this.pctr1_Click);
+            this.pctr1.MouseDown += new System.Windows.Forms.MouseEventHandler(this.pctr1_MouseDown);
+            this.pctr1.MouseUp += new System.Windows.Forms.MouseEventHandler(this.pctr1_MouseUp);
             // 
             // btn1
             // 
@@ -75,7 +84,7 @@
             this.btn1.Name = "btn1";
             this.btn1.Size = new System.Drawing.Size(125, 44);
             this.btn1.TabIndex = 1;
-            this.btn1.Text = "Пуск";
+            this.btn1.Text = "Start";
             this.btn1.UseVisualStyleBackColor = true;
             this.btn1.Visible = false;
             this.btn1.Click += new System.EventHandler(this.btn1_Click);
@@ -91,7 +100,7 @@
             this.btn2.Name = "btn2";
             this.btn2.Size = new System.Drawing.Size(125, 41);
             this.btn2.TabIndex = 2;
-            this.btn2.Text = "Завантажити";
+            this.btn2.Text = "Load";
             this.btn2.UseVisualStyleBackColor = true;
             this.btn2.Click += new System.EventHandler(this.button1_Click);
             // 
@@ -101,7 +110,7 @@
             this.btn3.Name = "btn3";
             this.btn3.Size = new System.Drawing.Size(104, 44);
             this.btn3.TabIndex = 3;
-            this.btn3.Text = "Пауза";
+            this.btn3.Text = "Pause";
             this.btn3.UseVisualStyleBackColor = true;
             this.btn3.Visible = false;
             this.btn3.Click += new System.EventHandler(this.btn3_Click);
@@ -109,20 +118,18 @@
             // lbl1
             // 
             this.lbl1.AutoSize = true;
-            this.lbl1.Location = new System.Drawing.Point(725, 512);
+            this.lbl1.Location = new System.Drawing.Point(790, 512);
             this.lbl1.Name = "lbl1";
-            this.lbl1.Size = new System.Drawing.Size(56, 20);
+            this.lbl1.Size = new System.Drawing.Size(0, 20);
             this.lbl1.TabIndex = 4;
-            this.lbl1.Text = "Ходів:";
             // 
             // lbl2
             // 
             this.lbl2.AutoSize = true;
-            this.lbl2.Location = new System.Drawing.Point(725, 532);
+            this.lbl2.Location = new System.Drawing.Point(813, 532);
             this.lbl2.Name = "lbl2";
-            this.lbl2.Size = new System.Drawing.Size(112, 20);
+            this.lbl2.Size = new System.Drawing.Size(0, 20);
             this.lbl2.TabIndex = 5;
-            this.lbl2.Text = "Живих клітин:";
             // 
             // grpBx1
             // 
@@ -133,7 +140,7 @@
             this.grpBx1.Size = new System.Drawing.Size(185, 89);
             this.grpBx1.TabIndex = 6;
             this.grpBx1.TabStop = false;
-            this.grpBx1.Text = "Колір клітин:";
+            this.grpBx1.Text = "Colour:";
             this.grpBx1.Enter += new System.EventHandler(this.grpBx1_Enter);
             // 
             // rdBtn2
@@ -142,10 +149,10 @@
             this.rdBtn2.Enabled = false;
             this.rdBtn2.Location = new System.Drawing.Point(6, 55);
             this.rdBtn2.Name = "rdBtn2";
-            this.rdBtn2.Size = new System.Drawing.Size(102, 24);
+            this.rdBtn2.Size = new System.Drawing.Size(57, 24);
             this.rdBtn2.TabIndex = 1;
             this.rdBtn2.TabStop = true;
-            this.rdBtn2.Text = "Червоний";
+            this.rdBtn2.Text = "Red";
             this.rdBtn2.UseVisualStyleBackColor = true;
             // 
             // rdBtn1
@@ -154,10 +161,10 @@
             this.rdBtn1.Checked = true;
             this.rdBtn1.Location = new System.Drawing.Point(6, 25);
             this.rdBtn1.Name = "rdBtn1";
-            this.rdBtn1.Size = new System.Drawing.Size(68, 24);
+            this.rdBtn1.Size = new System.Drawing.Size(59, 24);
             this.rdBtn1.TabIndex = 0;
             this.rdBtn1.TabStop = true;
-            this.rdBtn1.Text = "Синій";
+            this.rdBtn1.Text = "Blue";
             this.rdBtn1.UseVisualStyleBackColor = true;
             this.rdBtn1.CheckedChanged += new System.EventHandler(this.rdBtn1_CheckedChanged);
             // 
@@ -174,17 +181,18 @@
             this.groupBox1.Size = new System.Drawing.Size(235, 205);
             this.groupBox1.TabIndex = 7;
             this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "Кількість кольорів:";
+            this.groupBox1.Text = "Number of colours:";
             // 
             // chkbx1
             // 
             this.chkbx1.AutoSize = true;
             this.chkbx1.Location = new System.Drawing.Point(7, 167);
             this.chkbx1.Name = "chkbx1";
-            this.chkbx1.Size = new System.Drawing.Size(130, 24);
+            this.chkbx1.Size = new System.Drawing.Size(78, 24);
             this.chkbx1.TabIndex = 9;
-            this.chkbx1.Text = "Переміщення";
+            this.chkbx1.Text = "Moving";
             this.chkbx1.UseVisualStyleBackColor = true;
+            this.chkbx1.CheckedChanged += new System.EventHandler(this.chkbx1_CheckedChanged);
             // 
             // txtBx1
             // 
@@ -201,18 +209,18 @@
             this.label1.AutoSize = true;
             this.label1.Location = new System.Drawing.Point(6, 112);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(206, 20);
+            this.label1.Size = new System.Drawing.Size(171, 20);
             this.label1.TabIndex = 7;
-            this.label1.Text = "Потрібна кількість сусідів:";
+            this.label1.Text = "Neighbors to stay alive:";
             // 
             // rdBtn7
             // 
             this.rdBtn7.AutoSize = true;
             this.rdBtn7.Location = new System.Drawing.Point(7, 85);
             this.rdBtn7.Name = "rdBtn7";
-            this.rdBtn7.Size = new System.Drawing.Size(87, 24);
+            this.rdBtn7.Size = new System.Drawing.Size(59, 24);
             this.rdBtn7.TabIndex = 6;
-            this.rdBtn7.Text = "Дев\'ять";
+            this.rdBtn7.Text = "Nine";
             this.rdBtn7.UseVisualStyleBackColor = true;
             this.rdBtn7.CheckedChanged += new System.EventHandler(this.rdBtn7_CheckedChanged);
             // 
@@ -222,10 +230,10 @@
             this.rdBtn4.Checked = true;
             this.rdBtn4.Location = new System.Drawing.Point(7, 25);
             this.rdBtn4.Name = "rdBtn4";
-            this.rdBtn4.Size = new System.Drawing.Size(68, 24);
+            this.rdBtn4.Size = new System.Drawing.Size(57, 24);
             this.rdBtn4.TabIndex = 5;
             this.rdBtn4.TabStop = true;
-            this.rdBtn4.Text = "Один";
+            this.rdBtn4.Text = "One";
             this.rdBtn4.UseVisualStyleBackColor = true;
             this.rdBtn4.CheckedChanged += new System.EventHandler(this.rdBtn4_CheckedChanged_1);
             // 
@@ -234,9 +242,9 @@
             this.rdBtn5.AutoSize = true;
             this.rdBtn5.Location = new System.Drawing.Point(7, 55);
             this.rdBtn5.Name = "rdBtn5";
-            this.rdBtn5.Size = new System.Drawing.Size(57, 24);
+            this.rdBtn5.Size = new System.Drawing.Size(56, 24);
             this.rdBtn5.TabIndex = 4;
-            this.rdBtn5.Text = "Два";
+            this.rdBtn5.Text = "Two";
             this.rdBtn5.UseVisualStyleBackColor = true;
             this.rdBtn5.CheckedChanged += new System.EventHandler(this.rdBtn4_CheckedChanged);
             // 
@@ -251,7 +259,7 @@
             this.btn4.Name = "btn4";
             this.btn4.Size = new System.Drawing.Size(104, 44);
             this.btn4.TabIndex = 8;
-            this.btn4.Text = "Зберегти";
+            this.btn4.Text = "Save";
             this.btn4.UseVisualStyleBackColor = true;
             this.btn4.Click += new System.EventHandler(this.btn4_Click);
             // 
@@ -261,7 +269,7 @@
             this.btn5.Name = "btn5";
             this.btn5.Size = new System.Drawing.Size(104, 44);
             this.btn5.TabIndex = 9;
-            this.btn5.Text = "Вихід";
+            this.btn5.Text = "Exit";
             this.btn5.UseVisualStyleBackColor = true;
             this.btn5.Click += new System.EventHandler(this.btn5_Click);
             // 
@@ -281,7 +289,7 @@
             this.btn6.Name = "btn6";
             this.btn6.Size = new System.Drawing.Size(104, 41);
             this.btn6.TabIndex = 11;
-            this.btn6.Text = "Очистити";
+            this.btn6.Text = "Clear";
             this.btn6.UseVisualStyleBackColor = true;
             this.btn6.Click += new System.EventHandler(this.btn6_Click);
             // 
@@ -291,7 +299,7 @@
             this.btn7.Name = "btn7";
             this.btn7.Size = new System.Drawing.Size(104, 44);
             this.btn7.TabIndex = 12;
-            this.btn7.Text = "Випадково";
+            this.btn7.Text = "Random";
             this.btn7.UseVisualStyleBackColor = true;
             this.btn7.Click += new System.EventHandler(this.btn7_Click);
             // 
@@ -307,17 +315,72 @@
             // lbl3
             // 
             this.lbl3.AutoSize = true;
-            this.lbl3.Location = new System.Drawing.Point(725, 552);
+            this.lbl3.Location = new System.Drawing.Point(825, 552);
             this.lbl3.Name = "lbl3";
-            this.lbl3.Size = new System.Drawing.Size(114, 20);
+            this.lbl3.Size = new System.Drawing.Size(0, 20);
             this.lbl3.TabIndex = 14;
-            this.lbl3.Text = "Щільність (%):";
+            // 
+            // pctr2
+            // 
+            this.pctr2.Location = new System.Drawing.Point(936, 683);
+            this.pctr2.Name = "pctr2";
+            this.pctr2.Size = new System.Drawing.Size(701, 701);
+            this.pctr2.TabIndex = 15;
+            this.pctr2.TabStop = false;
+            this.pctr2.Visible = false;
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(725, 552);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(94, 20);
+            this.label3.TabIndex = 16;
+            this.label3.Text = "Dencity (%):";
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(725, 532);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(82, 20);
+            this.label4.TabIndex = 17;
+            this.label4.Text = "Cells alive:";
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(725, 512);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(59, 20);
+            this.label5.TabIndex = 18;
+            this.label5.Text = "Cycles:";
+            // 
+            // checkEntering
+            // 
+            this.checkEntering.Location = new System.Drawing.Point(829, 164);
+            this.checkEntering.Name = "checkEntering";
+            this.checkEntering.Size = new System.Drawing.Size(129, 51);
+            this.checkEntering.TabIndex = 19;
+            this.checkEntering.Text = "Сontinuous entering";
+            this.checkEntering.UseVisualStyleBackColor = true;
+            this.checkEntering.Visible = false;
+            // 
+            // timerEntering
+            // 
+            this.timerEntering.Interval = 1;
+            this.timerEntering.Tick += new System.EventHandler(this.timerEntering_Tick);
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(970, 725);
+            this.Controls.Add(this.checkEntering);
+            this.Controls.Add(this.label5);
+            this.Controls.Add(this.label4);
+            this.Controls.Add(this.label3);
+            this.Controls.Add(this.pctr2);
             this.Controls.Add(this.lbl3);
             this.Controls.Add(this.txtBx2);
             this.Controls.Add(this.btn7);
@@ -347,6 +410,7 @@
             this.grpBx1.PerformLayout();
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pctr2)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -380,6 +444,12 @@
         private System.Windows.Forms.Button btn7;
         private System.Windows.Forms.TextBox txtBx2;
         private System.Windows.Forms.Label lbl3;
+        private System.Windows.Forms.PictureBox pctr2;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.CheckBox checkEntering;
+        private System.Windows.Forms.Timer timerEntering;
     }
 }
 
